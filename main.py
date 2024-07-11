@@ -2,6 +2,7 @@ import pandas as pd
 import openpyxl
 import streamlit as st
 import os
+from io import BytesIO
 
 def main():
     # ダッシュボード設定
@@ -71,26 +72,31 @@ def main():
             ws.cell(row=i, column=ws.max_column, value=value)
             ws.cell(row=1,column=9,value=value_projectName)
             ws.cell(row=2,column=9,value=value_mapCode)
+        
+        # 修正したExcelデータを保存するためのバイナリデータを作成
+        output = BytesIO()
+        wb.save(output)
+        output.seek(0)
 
-        # 修正したExcelデータを保存をホームのdownloadディレクトリに格納
-        # ユーザーのホームディレクトリを取得
-        home_directory = os.path.expanduser('~')
-        # 'download'ディレクトリのフルパスを作成
-        download_directory = os.path.join(home_directory, 'Downloads')
-        print(download_directory)
-        output_filename = 'スキルマップデータ.xlsx'
-        output_filepath = os.path.join(download_directory, output_filename)
-        wb.save(output_filepath)
-
+        # ダウンロードボタン操作メッセージを表示する
         # HTMLとCSSを使ってフォントサイズを指定
         html_str = """
         <style>p.big-font2 {font-size:24px;color:blue}</style>
         <p class='big-font2'>
-        「スキルマップデータ.xlsx」をローカルのDownloadsフォルダーに格納しました。
+        下のボタンを押して「スキルマップデータ.xlsx」をローカルのDownloadsフォルダーに格納してください。
         </p>
         """
         # st.write()を使ってHTMLを表示
-        st.write(html_str, unsafe_allow_html=True)
+        st.write(html_str, unsafe_allow_html=True)        
+
+        # ダウンロードボタンを作成してユーザーにファイルをダウンロードさせる
+        st.download_button(
+            label="スキルマップデータ.xlsxをダウンロード",
+            data=output,
+            file_name="スキルマップデータ.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
 
         "本ツールを再度実行する際は、再読み込み（左上の右回転矢印）してください。"
 
